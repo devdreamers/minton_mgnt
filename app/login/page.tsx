@@ -12,6 +12,8 @@ const providers = [
 
 export default function LoginPage() {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (provider: string) => {
@@ -36,6 +38,25 @@ export default function LoginPage() {
     }
   };
 
+  const handlePasswordLogin = async () => {
+    setLoadingProvider("password");
+    setError(null);
+
+    const supabase = createSupabaseBrowserClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (signInError) {
+      setError(signInError.message);
+      setLoadingProvider(null);
+      return;
+    }
+
+    window.location.href = "/";
+  };
+
   return (
     <section className="card" style={{ maxWidth: 560, margin: "0 auto" }}>
       <span className="eyebrow">Authentication</span>
@@ -46,6 +67,40 @@ export default function LoginPage() {
       </p>
 
       <div className="stack" style={{ marginTop: 24 }}>
+        <form
+          className="stack"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handlePasswordLogin();
+          }}
+        >
+          <label>
+            이메일
+            <input
+              autoComplete="email"
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="admin@minton.local"
+              required
+              type="email"
+              value={email}
+            />
+          </label>
+          <label>
+            비밀번호
+            <input
+              autoComplete="current-password"
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              type="password"
+              value={password}
+            />
+          </label>
+          <button className="btn btn-primary" disabled={loadingProvider !== null} type="submit">
+            {loadingProvider === "password" ? "로그인 중..." : "이메일로 로그인"}
+          </button>
+        </form>
+
+        <div className="subtle" style={{ textAlign: "center" }}>또는 소셜 로그인</div>
         {providers.map((provider) => (
           <button
             key={provider.id}
