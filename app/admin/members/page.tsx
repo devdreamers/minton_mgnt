@@ -50,7 +50,11 @@ export default async function AdminMembersPage({
                   </td>
                   <td>{member.phone ?? "미입력"}</td>
                   <td><span className={`status-badge status-${member.status}`}>{member.status === "approved" ? "승인" : member.status === "pending" ? "대기" : member.status === "rejected" ? "거절" : "중지"}</span></td>
-                  <td>{new Date(member.created_at).toLocaleString("ko-KR")}</td>
+                  <td>
+                    {new Date(member.created_at).toLocaleString("ko-KR", {
+                      timeZone: "Asia/Seoul"
+                    })}
+                  </td>
                   <td>
                     <div className="inline-actions">
                       {member.status === "pending" ? <>
