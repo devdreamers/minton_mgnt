@@ -8,7 +8,7 @@ export async function requireApprovedAdmin() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login?next=/admin");
+    redirect("/admin/login");
   }
 
   const member = await getCurrentMemberByAuthUserId(user.id);

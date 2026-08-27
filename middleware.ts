@@ -35,9 +35,10 @@ export async function middleware(request: NextRequest) {
 
   const protectedPaths = ["/admin", "/memberships", "/sessions", "/profile"];
   const isProtected = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path));
+  const isAdminLogin = request.nextUrl.pathname === "/admin/login";
 
-  if (isProtected && !user) {
-    const url = new URL("/login", request.url);
+  if (isProtected && !isAdminLogin && !user) {
+    const url = new URL(request.nextUrl.pathname.startsWith("/admin") ? "/admin/login" : "/login", request.url);
     url.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(url);
   }
