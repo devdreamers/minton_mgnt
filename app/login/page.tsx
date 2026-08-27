@@ -12,7 +12,7 @@ const providers = [
 
 export default function LoginPage() {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
+  const [adminId, setAdminId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -42,9 +42,15 @@ export default function LoginPage() {
     setLoadingProvider("password");
     setError(null);
 
+    if (adminId !== "admin") {
+      setError("관리자 아이디는 admin입니다.");
+      setLoadingProvider(null);
+      return;
+    }
+
     const supabase = createSupabaseBrowserClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
+      email: "admin@minton.local",
       password
     });
 
@@ -62,8 +68,8 @@ export default function LoginPage() {
       <span className="eyebrow">Authentication</span>
       <h1 style={{ marginTop: 12 }}>관리자 승인 후 이용합니다.</h1>
       <p className="muted">
-        회원가입은 소셜 로그인으로만 진행합니다. 로그인 후 생성되는 회원 정보는
-        관리자 승인 전까지 pending 상태로 남습니다.
+        관리자는 아이디와 비밀번호로 로그인합니다. 일반 회원은 회원가입 없이
+        소셜 로그인으로 이용할 수 있습니다.
       </p>
 
       <div className="stack" style={{ marginTop: 24 }}>
@@ -74,33 +80,35 @@ export default function LoginPage() {
             void handlePasswordLogin();
           }}
         >
-          <label>
-            이메일
+          <div className="field">
+            <label htmlFor="admin-id">관리자 아이디</label>
             <input
-              autoComplete="email"
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="admin@minton.local"
+              autoComplete="username"
+              id="admin-id"
+              onChange={(event) => setAdminId(event.target.value)}
+              placeholder="admin"
               required
-              type="email"
-              value={email}
+              type="text"
+              value={adminId}
             />
-          </label>
-          <label>
-            비밀번호
+          </div>
+          <div className="field">
+            <label htmlFor="admin-password">비밀번호</label>
             <input
               autoComplete="current-password"
+              id="admin-password"
               onChange={(event) => setPassword(event.target.value)}
               required
               type="password"
               value={password}
             />
-          </label>
+          </div>
           <button className="btn btn-primary" disabled={loadingProvider !== null} type="submit">
-            {loadingProvider === "password" ? "로그인 중..." : "이메일로 로그인"}
+            {loadingProvider === "password" ? "로그인 중..." : "관리자 로그인"}
           </button>
         </form>
 
-        <div className="subtle" style={{ textAlign: "center" }}>또는 소셜 로그인</div>
+        <div className="subtle" style={{ textAlign: "center" }}>일반 회원 소셜 로그인</div>
         {providers.map((provider) => (
           <button
             key={provider.id}
