@@ -9,6 +9,16 @@ import {
 } from "@/lib/services/membership-service";
 import { requireApprovedAdmin } from "@/lib/auth/require-admin";
 
+function todayInKorea() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+}
+
+function addDays(date: string, days: number) {
+  const result = new Date(`${date}T12:00:00Z`);
+  result.setUTCDate(result.getUTCDate() + days);
+  return result.toISOString().slice(0, 10);
+}
+
 export async function createProductAction(formData: FormData) {
   await requireApprovedAdmin();
   const name = String(formData.get("name") ?? "");
@@ -68,11 +78,22 @@ export async function issueMembershipAction(formData: FormData) {
     const product = await getMembershipProduct(productId);
     title = product.name;
     totalCount = product.total_count;
-    if (startDate) {
-      const end = new Date(`${startDate}T12:00:00Z`);
-      end.setUTCDate(end.getUTCDate() + product.validity_days);
-      endDate = end.toISOString().slice(0, 10);
-    }
+    const issuedDate = todayInKorea();
+    endDate = addDays(issuedDate, product.validity_days);
+    await issueMembership({
+      member_id: memberId,
+      product_id: product.id,
+      source_type: sourceType,
+      title,
+      total_count: totalCount,
+      start_date: issuedDate,
+      end_date: endDate,
+      created_by: adminMember.auth_user_id,
+      memo
+    });
+    revalidatePath("/admin/memberships");
+    revalidatePath("/memberships");
+    return;
   }
 
   if (!memberId || !title || totalCount <= 0) {

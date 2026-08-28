@@ -236,6 +236,7 @@ cancel_lesson_booking(booking_id, cutoff_hours=12)
 - [x] 회원 페이지: 본인 회원권 잔여 조회
 - [x] 회원 급수 저장 필드 및 관리자 회원 목록에서 급수 변경
 - [x] 회원 프로필에서 본인 급수 확인
+- [x] 상품 발급일(한국 기준)을 시작일로 사용하고 상품 유효기간으로 종료일 자동 계산
 - [x] `consume_membership` RPC 구현 및 FIFO 차감/사용 로그 기록
 - [~] Google OAuth 연동: 로그인 UI와 callback 구현 완료, Supabase provider 설정 및 실환경 검증 필요
 - [~] Kakao OIDC 연동: 로그인 UI와 provider 분기 구현 완료, Supabase Custom OIDC 설정 및 실환경 검증 필요

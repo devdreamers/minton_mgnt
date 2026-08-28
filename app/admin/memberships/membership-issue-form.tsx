@@ -11,9 +11,13 @@ function addDays(date: string, days: number) {
   return result.toISOString().slice(0, 10);
 }
 
+function todayInKorea() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+}
+
 export function MembershipIssueForm({ members, products }: { members: Member[]; products: MembershipProduct[] }) {
   const [productId, setProductId] = useState(products[0]?.id ?? "");
-  const [startDate, setStartDate] = useState("");
+  const [startDate, setStartDate] = useState(todayInKorea());
   const [title, setTitle] = useState(products[0]?.name ?? "");
   const [totalCount, setTotalCount] = useState(String(products[0]?.total_count ?? ""));
   const selectedProduct = useMemo(() => products.find((product) => product.id === productId), [productId, products]);
@@ -55,7 +59,7 @@ export function MembershipIssueForm({ members, products }: { members: Member[]; 
         <div className="field"><label>상품 유효기간</label><div className="notice">{selectedProduct ? `${selectedProduct.validity_days}일 · 상품에서 자동 적용` : "직접 입력"}</div></div>
       </div>
       <div className="grid cols-3">
-        <div className="field"><label htmlFor="start-date">시작일</label><input id="start-date" name="start_date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} required={Boolean(selectedProduct)} /></div>
+        <div className="field"><label htmlFor="start-date">발급일(시작일)</label><input id="start-date" name="start_date" type="date" value={startDate} readOnly={Boolean(selectedProduct)} onChange={(event) => setStartDate(event.target.value)} required={Boolean(selectedProduct)} /></div>
         <div className="field"><label htmlFor="end-date">종료일</label><input id="end-date" name="end_date" type="date" value={selectedProduct ? addDays(startDate, selectedProduct.validity_days) : ""} readOnly={Boolean(selectedProduct)} /></div>
         <div className="field"><label htmlFor="memo">메모</label><input id="memo" name="memo" placeholder="사유, 이력 등" /></div>
       </div>
