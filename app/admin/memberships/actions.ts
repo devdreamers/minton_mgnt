@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import {
   createMembershipProduct,
+  getMembershipProduct,
   issueMembership,
   updateMembershipProduct
 } from "@/lib/services/membership-service";
@@ -57,11 +58,22 @@ export async function issueMembershipAction(formData: FormData) {
     | "product"
     | "promotion"
     | "restore";
-  const title = String(formData.get("title") ?? "");
-  const totalCount = Number(formData.get("total_count") ?? 0);
+  let title = String(formData.get("title") ?? "");
+  let totalCount = Number(formData.get("total_count") ?? 0);
   const startDate = String(formData.get("start_date") ?? "") || null;
-  const endDate = String(formData.get("end_date") ?? "") || null;
+  let endDate = String(formData.get("end_date") ?? "") || null;
   const memo = String(formData.get("memo") ?? "") || null;
+
+  if (productId) {
+    const product = await getMembershipProduct(productId);
+    title = product.name;
+    totalCount = product.total_count;
+    if (startDate) {
+      const end = new Date(`${startDate}T12:00:00Z`);
+      end.setUTCDate(end.getUTCDate() + product.validity_days);
+      endDate = end.toISOString().slice(0, 10);
+    }
+  }
 
   if (!memberId || !title || totalCount <= 0) {
     throw new Error("발급 정보가 올바르지 않습니다.");

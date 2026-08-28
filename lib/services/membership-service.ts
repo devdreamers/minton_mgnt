@@ -18,6 +18,16 @@ export async function listMembershipProducts() {
   return data as MembershipProduct[];
 }
 
+export async function getMembershipProduct(productId: string) {
+  const { data, error } = await createSupabaseAdminClient()
+    .from("membership_products")
+    .select("*")
+    .eq("id", productId)
+    .single();
+  if (error) throw new Error(error.message);
+  return data as MembershipProduct;
+}
+
 export async function listMembershipsForMember(memberId: string) {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
