@@ -8,8 +8,8 @@ import { getCurrentMemberByAuthUserId } from "@/lib/services/member-service";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "minton mngt",
-  description: "배드민턴 센터 운영 관리 사이트 MVP1"
+  title: "에이원민턴",
+  description: "No.1 배드민턴 센터"
 };
 
 export default async function RootLayout({
@@ -26,9 +26,9 @@ export default async function RootLayout({
         <div className="app-shell">
           <header className="topbar">
             <Link className="brand" href="/">
-              <span className="brand-mark">M</span>
+              <span className="brand-mark">A1</span>
               <span>
-                <strong>minton</strong> mngt
+                <strong>A1</strong> minton
               </span>
             </Link>
             <nav className="nav">

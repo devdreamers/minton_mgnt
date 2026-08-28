@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { requireApprovedAdmin } from "@/lib/auth/require-admin";
-import { cancelSession, createSessionInstance, createSessionTemplate } from "@/lib/services/session-service";
+import { cancelSession, createSessionInstance, createSessionTemplate, getSessionTemplate } from "@/lib/services/session-service";
 
-const koreaDateTime = (value: string) => new Date(`${value}:00+09:00`).toISOString();
+const koreaDateTimeForDate = (date: string, time: string) => new Date(`${date}T${time.slice(0, 5)}:00+09:00`).toISOString();
 
 export async function createTemplateAction(formData: FormData) {
   const admin = await requireApprovedAdmin();
@@ -23,12 +23,18 @@ export async function createInstanceAction(formData: FormData) {
   await requireApprovedAdmin();
   const templateId = String(formData.get("template_id") ?? "");
   const date = String(formData.get("session_date") ?? "");
-  const start = String(formData.get("start_at") ?? "");
-  const end = String(formData.get("end_at") ?? "");
-  const open = String(formData.get("application_open_at") ?? "");
-  const capacity = Number(formData.get("capacity"));
-  if (!templateId || !date || !start || !end || !open || capacity < 1) throw new Error("소모임 회차 정보가 올바르지 않습니다.");
-  await createSessionInstance({ template_id: templateId, session_date: date, start_at: koreaDateTime(start), end_at: koreaDateTime(end), application_open_at: koreaDateTime(open), capacity });
+  if (!templateId || !date) throw new Error("소모임 템플릿과 날짜를 선택해주세요.");
+  const template = await getSessionTemplate(templateId);
+  const selectedDay = new Date(`${date}T12:00:00Z`).getUTCDay();
+  if (selectedDay !== template.day_of_week) throw new Error("템플릿의 요일과 회차 날짜가 일치하지 않습니다.");
+  await createSessionInstance({
+    template_id: template.id,
+    session_date: date,
+    start_at: koreaDateTimeForDate(date, template.start_time),
+    end_at: koreaDateTimeForDate(date, template.end_time),
+    application_open_at: koreaDateTimeForDate(date, template.application_open_time),
+    capacity: template.capacity
+  });
   revalidatePath("/admin/sessions"); revalidatePath("/sessions");
 }
 

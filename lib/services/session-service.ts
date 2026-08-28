@@ -10,6 +10,16 @@ export async function listSessionTemplates() {
   return data as SessionTemplate[];
 }
 
+export async function getSessionTemplate(templateId: string) {
+  const { data, error } = await createSupabaseAdminClient()
+    .from("session_templates")
+    .select("*")
+    .eq("id", templateId)
+    .single();
+  if (error) throw new Error(error.message);
+  return data as SessionTemplate;
+}
+
 export async function listUpcomingSessions(from = new Date().toISOString().slice(0, 10)) {
   const { data, error } = await createSupabaseAdminClient().from("session_instances").select("*, session_templates(title)").gte("session_date", from).order("session_date").order("start_at");
   if (error) throw new Error(error.message);
