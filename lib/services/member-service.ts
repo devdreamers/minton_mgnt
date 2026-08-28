@@ -84,3 +84,18 @@ export async function updateMemberProfile(memberId: string, input: { name: strin
   revalidatePath("/profile");
   return data as Member;
 }
+
+export async function updateMemberSkillLevel(memberId: string, skillLevel: string) {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("members")
+    .update({ skill_level: skillLevel })
+    .eq("id", memberId)
+    .select("*")
+    .single();
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/members");
+  revalidatePath("/profile");
+  return data as Member;
+}

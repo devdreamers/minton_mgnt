@@ -14,6 +14,7 @@ export default async function ProfilePage() {
       <ProfileForm name={member.name} phone={member.phone} />
 
       <p className="subtle" style={{ marginTop: 20 }}>
+        배드민턴 급수: <strong>{member.skill_level}</strong><br />
         가입 상태: {member.status === "approved" ? "승인됨" : member.status === "pending" ? "승인 대기" : member.status}
       </p>
     </section>

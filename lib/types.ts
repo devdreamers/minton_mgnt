@@ -1,6 +1,8 @@
 export type MemberRole = "member" | "admin";
 export type MemberStatus = "pending" | "approved" | "rejected" | "suspended";
 export type AuthProvider = "google" | "kakao";
+export const MEMBER_SKILL_LEVELS = ["미정", "초급", "D급", "C급", "B급", "A급", "S급"] as const;
+export type MemberSkillLevel = (typeof MEMBER_SKILL_LEVELS)[number];
 
 export type Member = {
   id: string;
@@ -9,6 +11,7 @@ export type Member = {
   phone: string | null;
   email: string | null;
   provider: AuthProvider | null;
+  skill_level: string;
   role: MemberRole;
   status: MemberStatus;
   approved_by: string | null;

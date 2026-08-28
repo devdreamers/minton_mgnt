@@ -103,9 +103,14 @@ apps/web/
 #### member-service
 ```
 members
-  id, name, phone, email, provider('google'|'kakao'),
+  id, name, phone, email, provider('google'|'kakao'), skill_level,
   role('member'|'admin'), status('pending'|'approved'|'rejected'|'suspended'),
   approved_by, approved_at, created_at
+
+skill_level
+  text not null default '미정'
+  -- 기본 선택지: 미정, 초급, D급, C급, B급, A급, S급
+  -- 향후 센터 운영 기준에 맞춰 선택지 확장 가능
 ```
 
 #### membership-service
@@ -206,48 +211,99 @@ cancel_lesson_booking(booking_id, cutoff_hours=12)
 
 ## 3. 구현 (Implementation)
 
-### 3-1. 완료된 설계 산출물
+### 3-1. 현재 구현 기반
+
+- Next.js 15 App Router + TypeScript 기반 모듈러 모놀리식 구조
+- Supabase SSR 인증 클라이언트, 서버 클라이언트, 관리자 클라이언트 분리
+- `lib/services`에 member / membership / session 서비스 레이어 분리
+- 회원·회원권·소모임 도메인 타입을 `lib/types.ts`에서 관리
+- 회원/관리자 권한 가드(`requireApprovedMember`, `requireApprovedAdmin`) 적용
+- 서버 액션으로 폼 입력을 처리하고 변경 후 관련 경로를 재검증
+
+### 3-2. 완료된 설계 산출물
+
 - member/membership/session/lesson 4개 서비스 전체 스키마
 - RPC 함수 5종 설계 완료
 - MSA 폴더 구조 및 서비스 간 통신 원칙 (직접 join 금지, 서비스 레이어 경유)
 
-### 3-2. MVP1 — 회원 + 회원권 (다음 착수 대상)
-- [ ] Supabase 마이그레이션 SQL 작성 (member/membership 스키마)
-- [ ] Google OAuth 연동
-- [ ] Kakao OIDC 연동
-- [ ] 회원 자동 생성 트리거 (`on_auth_user_created`)
-- [ ] `consume_membership` RPC 구현
-- [ ] 관리자 페이지: 가입 승인/거절, 회원 목록
-- [ ] 관리자 페이지: 회원권 상품 CRUD
-- [ ] 관리자 페이지: 회원권 발급(정식/프로모션/복구)
-- [ ] 회원 페이지: 본인 회원권 잔여 조회
+### 3-3. MVP1 — 회원 + 회원권
+
+- [x] Supabase 마이그레이션 SQL 작성: `001_member_service.sql`, `002_membership_service.sql`
+- [x] `members` 자동 생성 트리거 (`handle_new_user`)
+- [x] 관리자 페이지: 가입 승인/거절, 회원 목록
+- [x] 관리자 페이지: 회원권 상품 생성/수정 및 활성·중지 상태 관리
+- [x] 관리자 페이지: 회원권 발급(정식/프로모션/복구 유형)
+- [x] 회원 페이지: 본인 회원권 잔여 조회
+- [x] 회원 급수 저장 필드 및 관리자 회원 목록에서 급수 변경
+- [x] 회원 프로필에서 본인 급수 확인
+- [x] `consume_membership` RPC 구현 및 FIFO 차감/사용 로그 기록
+- [~] Google OAuth 연동: 로그인 UI와 callback 구현 완료, Supabase provider 설정 및 실환경 검증 필요
+- [~] Kakao OIDC 연동: 로그인 UI와 provider 분기 구현 완료, Supabase Custom OIDC 설정 및 실환경 검증 필요
 - [ ] Vercel Cron: 회원권 만료 배치
 
-### 3-3. MVP2 — 소모임
-- [x] session 스키마 마이그레이션
-- [ ] 인스턴스 자동 생성 Cron (4주치)
-- [x] `apply_session` / `cancel_session_application` RPC 구현
-- [x] 관리자: 템플릿 등록, 회차 취소
-- [x] 회원: 예정 회차 목록, 신청/취소, 대기자 표시
+### 3-4. MVP2 — 소모임
 
-### 3-4. MVP3 — 레슨 예약
+- [x] session 스키마 마이그레이션: `003_session_service.sql`
+- [x] `apply_session` / `cancel_session_application` RPC 구현
+- [x] 정원 초과 시 대기자 등록 및 취소 시 순번 승격
+- [x] 중복 신청 방지 부분 유니크 인덱스
+- [x] 관리자: 템플릿 등록, 회차 수동 생성, 회차 취소
+- [x] 관리자: 회차별 확정/대기 신청자 조회
+- [x] 회원: 예정 회차 목록, 신청/취소, 대기자 표시
+- [ ] 인스턴스 자동 생성 Cron (향후 4주치)
+- [ ] 대기자 승격 알림
+
+### 3-5. MVP3 — 레슨 예약
 - [ ] lesson 스키마 마이그레이션
 - [ ] 코트/요일별 슬롯 자동 생성 Cron
 - [ ] `book_lesson` / `cancel_lesson_booking` RPC 구현
 - [ ] 관리자: 코트별 운영시간 템플릿 관리, 슬롯 차단(체험 레슨)
 - [ ] 회원: 코트 선택 → 시간대별 캘린더 → 예약/취소
 
-### 3-5. MVP4 — 대진표 (TBD, 요구사항 상세화 필요)
+### 3-6. MVP4 — 대진표 (TBD, 요구사항 상세화 필요)
 - [ ] 대진 방식 확정 (토너먼트/리그전, 급수 매칭 여부)
 - [ ] match_participants 설계 확정
 - [ ] 게스트 수동 추가 UI
 
-### 3-6. 후속 검토
+### 3-7. 후속 검토
 - [ ] notification-service (채널, 트리거 지점: 대기자 승격 알림 등)
+
+### 3-8. 검증 결과
+
+- [x] `npm run lint` 통과
+- [x] `npm run build` 통과
+- [ ] Supabase 실환경에서 OAuth, RLS, RPC 동시성 테스트
+- [ ] 모바일 기준 예약 캘린더 및 회원권 화면 UX 검증
+- [ ] 급수별 회원 필터링/통계 및 대진표 매칭 연동
 
 ---
 
-## 4. MVP1 구현 순서 제안
+## 4. 다음 구현 우선순위
+
+현재 다음 구현은 **MVP2 운영 자동화 마무리 → MVP3 레슨 예약 기반 구축** 순서로 진행한다.
+
+### 4-1. 1순위 — 소모임·회원권 운영 자동화 및 실환경 검증
+
+1. Vercel Cron으로 회원권 만료 배치 구현
+2. Vercel Cron으로 향후 4주 소모임 회차 자동 생성
+3. 관리자 액션과 RPC의 권한/RLS 경계 점검, Supabase 실환경에서 승인·발급·신청·대기승격 동시성 테스트
+4. Google OAuth와 Kakao Custom OIDC provider 설정 후 로그인부터 `pending` 회원 생성까지 검증
+5. 모바일 예약 캘린더 형태로 소모임 화면을 개선하고 성공/실패/마감 상태를 명확히 표시
+
+이 단계가 끝나면 MVP2를 운영 가능한 상태로 보고, 다음 단계인 레슨 예약 개발로 이동한다.
+
+### 4-2. 2순위 — MVP3 레슨 예약
+
+1. `lesson-service` 마이그레이션: 코트, 운영시간 템플릿, 슬롯, 예약 테이블
+2. 코트별 운영시간을 바탕으로 향후 N주 슬롯 생성
+3. `book_lesson` RPC에서 슬롯 잠금과 `consume_membership`을 하나의 트랜잭션으로 처리
+4. `cancel_lesson_booking` RPC에서 12시간 전 취소, 회원권 복구, 슬롯 재오픈 처리
+5. 관리자 코트/운영시간/슬롯 차단 화면 구현
+6. 회원 코트 선택 → 날짜 선택 → 시간 슬롯 예약/취소 화면 구현
+
+### 4-3. MVP1 당시 구현 순서 기록
+
+아래 순서는 MVP1을 구현할 때의 계획이며, 현재는 대부분 완료되었다.
 
 같은 MVP1 안에서도 **의존 순서 + 검증 가능 단위**로 나눠서 진행하는 걸 추천합니다.
 
@@ -270,4 +326,4 @@ cancel_lesson_booking(booking_id, cutoff_hours=12)
 
 **핵심 이유**: 1~3번까지는 "로그인 → 가입 → 승인"이라는 하나의 흐름이라 끊어서 하면 중간 테스트가 안 되니 묶어서 먼저 끝내는 게 좋고, 4~6번은 회원권의 CRUD 흐름이라 그다음 묶음, 7~8번은 이후 서비스(레슨)에서 필요해질 때 빛을 보는 부분이라 가장 뒤로 미뤄도 무방합니다.
 
-바로 **1번(마이그레이션 SQL) 작성**부터 시작할까요?
+현재 착수할 작업은 위 4-1의 1번인 **회원권 만료 배치 구현**이다.
