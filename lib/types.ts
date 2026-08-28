@@ -46,6 +46,16 @@ export type Membership = {
   updated_at: string;
 };
 
+export type MembershipLog = {
+  id: string;
+  membership_id: string;
+  change_type: "issue" | "use" | "expire" | "restore" | "cancel";
+  change_amount: number;
+  reason: string | null;
+  created_by: string | null;
+  created_at: string;
+};
+
 export type SessionTemplate = {
   id: string;
   title: string;

@@ -2,7 +2,7 @@ import "server-only";
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import type { Membership, MembershipProduct } from "@/lib/types";
+import type { Membership, MembershipLog, MembershipProduct } from "@/lib/types";
 
 export async function listMembershipProducts() {
   const supabase = createSupabaseAdminClient();
@@ -41,6 +41,18 @@ export async function listMembershipsForMember(memberId: string) {
   }
 
   return data as Membership[];
+}
+
+export async function listMembershipLogsForMember(memberId: string) {
+  const memberships = await listMembershipsForMember(memberId);
+  if (memberships.length === 0) return [] as MembershipLog[];
+  const { data, error } = await createSupabaseAdminClient()
+    .from("membership_logs")
+    .select("*")
+    .in("membership_id", memberships.map((membership) => membership.id))
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data as MembershipLog[];
 }
 
 export async function createMembershipProduct(input: {

@@ -49,7 +49,7 @@ export default async function AdminMembersPage({
               members.map((member) => (
                 <tr key={member.id}>
                   <td>
-                    <strong>{member.name}</strong>
+                    <Link href={`/admin/members/${member.id}`}><strong>{member.name}</strong></Link>
                   </td>
                   <td>{member.phone ?? "미입력"}</td>
                   <td>
@@ -90,3 +90,4 @@ export default async function AdminMembersPage({
     </section>
   );
 }
+import Link from "next/link";

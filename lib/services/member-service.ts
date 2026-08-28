@@ -71,6 +71,16 @@ export async function getCurrentMemberByAuthUserId(authUserId: string) {
   return data as Member;
 }
 
+export async function getMemberById(memberId: string) {
+  const { data, error } = await createSupabaseAdminClient()
+    .from("members")
+    .select("*")
+    .eq("id", memberId)
+    .single();
+  if (error) throw new Error(error.message);
+  return data as Member;
+}
+
 export async function updateMemberProfile(memberId: string, input: { name: string; phone: string | null }) {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase

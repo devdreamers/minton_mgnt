@@ -18,6 +18,7 @@ function todayInKorea() {
 export function MembershipIssueForm({ members, products }: { members: Member[]; products: MembershipProduct[] }) {
   const [productId, setProductId] = useState(products[0]?.id ?? "");
   const [startDate, setStartDate] = useState(todayInKorea());
+  const [endDate, setEndDate] = useState("");
   const [title, setTitle] = useState(products[0]?.name ?? "");
   const [totalCount, setTotalCount] = useState(String(products[0]?.total_count ?? ""));
   const selectedProduct = useMemo(() => products.find((product) => product.id === productId), [productId, products]);
@@ -27,6 +28,7 @@ export function MembershipIssueForm({ members, products }: { members: Member[]; 
     setProductId(nextProductId);
     setTitle(product?.name ?? "");
     setTotalCount(product ? String(product.total_count) : "");
+    setEndDate(product ? addDays(startDate, product.validity_days) : "");
   };
 
   return (
@@ -60,7 +62,7 @@ export function MembershipIssueForm({ members, products }: { members: Member[]; 
       </div>
       <div className="grid cols-3">
         <div className="field"><label htmlFor="start-date">발급일(시작일)</label><input id="start-date" name="start_date" type="date" value={startDate} readOnly={Boolean(selectedProduct)} onChange={(event) => setStartDate(event.target.value)} required={Boolean(selectedProduct)} /></div>
-        <div className="field"><label htmlFor="end-date">종료일</label><input id="end-date" name="end_date" type="date" value={selectedProduct ? addDays(startDate, selectedProduct.validity_days) : ""} readOnly={Boolean(selectedProduct)} /></div>
+        <div className="field"><label htmlFor="end-date">종료일</label><input id="end-date" name="end_date" type="date" value={selectedProduct ? addDays(startDate, selectedProduct.validity_days) : endDate} readOnly={Boolean(selectedProduct)} onChange={(event) => setEndDate(event.target.value)} required /></div>
         <div className="field"><label htmlFor="memo">메모</label><input id="memo" name="memo" placeholder="사유, 이력 등" /></div>
       </div>
       <button className="btn btn-primary" type="submit">상품정보로 발급</button>
