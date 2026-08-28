@@ -43,7 +43,7 @@ export default async function RootLayout({
                       <span className="nav-menu-future">레슨 예약 · 준비 중</span>
                     </div>
                   </details>
-                  {isAdmin ? <Link className="nav-admin" href="/admin">관리자</Link> : null}
+                  {isAdmin ? <Link className="nav-admin" href="/admin">관리자 화면</Link> : null}
                   <form action={logoutAction}>
                     <button className="nav-button" type="submit">로그아웃</button>
                   </form>

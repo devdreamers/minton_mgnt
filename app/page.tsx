@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getCurrentMemberByAuthUserId } from "@/lib/services/member-service";
 import { getCurrentUser } from "@/lib/supabase/server";
 
@@ -22,6 +23,10 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const user = await getCurrentUser();
   const member = user ? await getCurrentMemberByAuthUserId(user.id) : null;
+
+  if (member?.role === "admin" && member.status === "approved") {
+    redirect("/admin");
+  }
 
   if (user) {
     return (
