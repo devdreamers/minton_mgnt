@@ -28,6 +28,23 @@ export async function listUpcomingSessions(from = new Date().toISOString().slice
   return data as (SessionInstance & { session_templates: { title: string } | null })[];
 }
 
+export async function listConfirmedApplicationCounts(sessionIds: string[]) {
+  const counts = new Map<string, number>();
+  if (sessionIds.length === 0) return counts;
+
+  const { data, error } = await createSupabaseAdminClient()
+    .from("session_applications")
+    .select("session_id")
+    .in("session_id", sessionIds)
+    .eq("status", "confirmed");
+  if (error) throw new Error(error.message);
+
+  for (const application of data ?? []) {
+    counts.set(application.session_id, (counts.get(application.session_id) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export async function listApplicationsForSession(sessionId: string) {
   const { data, error } = await createSupabaseAdminClient().from("session_applications").select("*, members(name, email)").eq("session_id", sessionId).in("status", ["confirmed", "waitlisted"]).order("status").order("waitlist_position").order("applied_at");
   if (error) throw new Error(error.message);
