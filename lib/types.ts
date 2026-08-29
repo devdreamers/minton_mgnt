@@ -91,3 +91,18 @@ export type SessionApplication = {
   updated_at: string;
   created_at: string;
 };
+
+export type LessonCourt = { id: string; name: string; is_active: boolean; created_at: string };
+export type LessonScheduleTemplate = {
+  id: string; court_id: string; day_of_week: number; start_time: string; end_time: string;
+  slot_interval_minutes: number; is_active: boolean; created_by: string | null; created_at: string;
+};
+export type LessonSlot = {
+  id: string; court_id: string; slot_date: string; start_at: string; end_at: string;
+  status: "available" | "booked" | "blocked" | "closed"; created_at: string;
+};
+export type LessonBooking = {
+  id: string; slot_id: string; member_id: string | null; membership_id: string | null;
+  source_type: "member" | "trial_guest" | "admin_block"; guest_name: string | null;
+  guest_memo: string | null; status: "confirmed" | "canceled"; canceled_at: string | null; created_at: string;
+};
