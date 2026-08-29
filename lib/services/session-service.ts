@@ -68,9 +68,19 @@ export async function createSessionInstance(input: Omit<SessionInstance, "id" | 
 }
 
 export async function cancelSession(sessionId: string) {
-  const { error } = await createSupabaseAdminClient().from("session_instances").update({ status: "canceled" }).eq("id", sessionId);
+  const { error } = await createSupabaseAdminClient().from("session_instances").delete().eq("id", sessionId);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/sessions"); revalidatePath("/sessions");
+}
+
+export async function deleteCanceledSession(sessionId: string) {
+  const { error } = await createSupabaseAdminClient()
+    .from("session_instances")
+    .delete()
+    .eq("id", sessionId)
+    .eq("status", "canceled");
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/sessions");
 }
 
 export async function applyToSession(sessionId: string, memberId: string) {
