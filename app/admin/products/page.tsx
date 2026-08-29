@@ -1,15 +1,18 @@
 import { createProductAction, updateProductAction } from "../memberships/actions";
 import { listMembershipProducts } from "@/lib/services/membership-service";
 import { requireApprovedAdmin } from "@/lib/auth/require-admin";
+import { SaveAlert } from "@/app/components/save-alert";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminProductsPage() {
+export default async function AdminProductsPage({ searchParams }: { searchParams: Promise<{ result?: string }> }) {
   await requireApprovedAdmin();
   const products = await listMembershipProducts().catch(() => []);
+  const result = (await searchParams).result;
 
   return (
     <div className="stack">
+      <SaveAlert message={result ? "저장했습니다." : null} />
       <section className="page-heading admin-heading">
         <span className="eyebrow">Products</span>
         <h1>상품 목록</h1>

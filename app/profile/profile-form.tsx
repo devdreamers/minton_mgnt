@@ -1,12 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { updateProfileAction } from "./actions";
 
 const initialState: { error: string; success: boolean } = { error: "", success: false };
 
 export function ProfileForm({ name, phone }: { name: string; phone: string | null }) {
   const [state, action, pending] = useActionState(updateProfileAction, initialState);
+  useEffect(() => {
+    if (state.success) window.alert("저장했습니다.");
+  }, [state.success]);
   return (
     <form className="form" action={action} style={{ marginTop: 28 }}>
       <div className="field">

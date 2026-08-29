@@ -2,6 +2,7 @@ import { approveMemberAction, rejectMemberAction, updateMemberSkillLevelAction }
 import { listMembers } from "@/lib/services/member-service";
 import { requireApprovedAdmin } from "@/lib/auth/require-admin";
 import { MEMBER_SKILL_LEVELS } from "@/lib/types";
+import { SaveAlert } from "@/app/components/save-alert";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export default async function AdminMembersPage({
 
   return (
     <section className="card">
+      <SaveAlert message={result ? "저장했습니다." : null} />
       <span className="eyebrow">Members</span>
       <h1 style={{ marginTop: 12 }}>회원 목록</h1>
       <p className="muted">

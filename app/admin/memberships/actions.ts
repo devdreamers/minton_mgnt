@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import {
   createMembershipProduct,
   getMembershipProduct,
@@ -37,6 +38,7 @@ export async function createProductAction(formData: FormData) {
   });
 
   revalidatePath("/admin/products");
+  redirect("/admin/products?result=product-created");
 }
 
 export async function updateProductAction(formData: FormData) {
@@ -58,6 +60,7 @@ export async function updateProductAction(formData: FormData) {
     is_active: isActive
   });
   revalidatePath("/admin/products");
+  redirect("/admin/products?result=product-updated");
 }
 
 export async function issueMembershipAction(formData: FormData) {
@@ -93,6 +96,7 @@ export async function issueMembershipAction(formData: FormData) {
     });
     revalidatePath("/admin/memberships");
     revalidatePath("/memberships");
+    redirect("/admin/memberships?result=membership-issued");
     return;
   }
 
@@ -114,4 +118,5 @@ export async function issueMembershipAction(formData: FormData) {
 
   revalidatePath("/admin/memberships");
   revalidatePath("/memberships");
+  redirect("/admin/memberships?result=membership-issued");
 }

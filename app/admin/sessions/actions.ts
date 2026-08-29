@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireApprovedAdmin } from "@/lib/auth/require-admin";
-import { cancelSession, createSessionInstance, createSessionTemplate, getSessionTemplate } from "@/lib/services/session-service";
+import { cancelSession, createSessionInstance, createSessionTemplate, getSessionTemplate, updateSessionTemplate } from "@/lib/services/session-service";
 
 const koreaDateTimeForDate = (date: string, time: string) => new Date(`${date}T${time.slice(0, 5)}:00+09:00`).toISOString();
 
@@ -19,6 +19,20 @@ export async function createTemplateAction(formData: FormData) {
   await createSessionTemplate({ title, day_of_week: day, start_time: start, end_time: end, application_open_time: open, capacity, is_active: true, created_by: admin.auth_user_id });
   revalidatePath("/admin/sessions");
   redirect("/admin/sessions?result=template-created");
+}
+
+export async function updateTemplateAction(formData: FormData) {
+  await requireApprovedAdmin();
+  const templateId = String(formData.get("template_id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const day = Number(formData.get("day_of_week"));
+  const start = String(formData.get("start_time") ?? "");
+  const end = String(formData.get("end_time") ?? "");
+  const open = String(formData.get("application_open_time") ?? "");
+  const capacity = Number(formData.get("capacity"));
+  if (!templateId || !title || !Number.isInteger(day) || day < 0 || day > 6 || !start || !end || !open || capacity < 1 || end <= start) throw new Error("소모임 템플릿 정보가 올바르지 않습니다.");
+  await updateSessionTemplate(templateId, { title, day_of_week: day, start_time: start, end_time: end, application_open_time: open, capacity, is_active: true });
+  redirect("/admin/sessions?result=template-updated");
 }
 
 export async function createInstanceAction(formData: FormData) {
@@ -40,7 +54,7 @@ export async function createInstanceAction(formData: FormData) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "회차 생성에 실패했습니다.";
-    redirect(`/admin/sessions?error=${message.includes("요일") ? "wrong-day" : message.includes("already exists") ? "duplicate" : "create-failed"}`);
+    redirect(`/admin/sessions?error=${message.includes("요일") ? "wrong-day" : message.includes("already exists") || message.includes("duplicate") || message.includes("unique") ? "duplicate" : "create-failed"}`);
   }
   revalidatePath("/admin/sessions"); revalidatePath("/sessions");
   redirect("/admin/sessions?result=instance-created");

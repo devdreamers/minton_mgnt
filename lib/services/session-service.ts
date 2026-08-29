@@ -45,6 +45,18 @@ export async function createSessionTemplate(input: Omit<SessionTemplate, "id" | 
   return data as SessionTemplate;
 }
 
+export async function updateSessionTemplate(templateId: string, input: Partial<Omit<SessionTemplate, "id" | "created_at" | "created_by">>) {
+  const { data, error } = await createSupabaseAdminClient()
+    .from("session_templates")
+    .update(input)
+    .eq("id", templateId)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/sessions");
+  return data as SessionTemplate;
+}
+
 export async function createSessionInstance(input: Omit<SessionInstance, "id" | "created_at" | "status">) {
   const { data, error } = await createSupabaseAdminClient().from("session_instances").insert({ ...input, status: "scheduled" }).select().single();
   if (error) throw new Error(error.message);

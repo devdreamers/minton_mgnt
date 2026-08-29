@@ -1,7 +1,9 @@
 import { requireApprovedAdmin } from "@/lib/auth/require-admin";
 import { listApplicationsForSession, listSessionTemplates, listUpcomingSessions } from "@/lib/services/session-service";
-import { cancelSessionAction, createInstanceAction, createTemplateAction } from "./actions";
+import { cancelSessionAction, createInstanceAction, createTemplateAction, updateTemplateAction } from "./actions";
 import { SessionInstanceForm } from "./session-instance-form";
+import { SessionTemplateEditor } from "./session-template-editor";
+import { SaveAlert } from "@/app/components/save-alert";
 
 const days = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
 export const dynamic = "force-dynamic";
@@ -13,6 +15,7 @@ export default async function AdminSessionsPage({ searchParams }: { searchParams
   const applications = new Map(applicationEntries);
   const query = await searchParams;
   const notice = query.result === "template-created" ? "소모임 템플릿을 저장했습니다."
+    : query.result === "template-updated" ? "소모임 템플릿을 수정했습니다."
     : query.result === "instance-created" ? "템플릿 정보로 회차를 생성했습니다."
     : query.error === "wrong-day" ? "선택한 날짜가 템플릿의 요일과 다릅니다."
     : query.error === "duplicate" ? "같은 템플릿과 날짜의 회차가 이미 있습니다."
@@ -21,6 +24,7 @@ export default async function AdminSessionsPage({ searchParams }: { searchParams
   const isError = Boolean(query.error);
 
   return <div className="stack">
+    <SaveAlert message={query.result ? "저장했습니다." : null} />
     {notice ? <div className={isError ? "notice danger" : "notice"}>{notice}</div> : null}
     <section className="card">
       <span className="eyebrow">Session templates</span><h1 style={{ marginTop: 12 }}>소모임 템플릿</h1>
@@ -30,7 +34,7 @@ export default async function AdminSessionsPage({ searchParams }: { searchParams
         <div className="grid cols-3"><div className="field"><label>시작</label><input name="start_time" type="time" defaultValue="19:00" required /></div><div className="field"><label>종료</label><input name="end_time" type="time" defaultValue="22:00" required /></div><div className="field"><label>신청 오픈</label><input name="application_open_time" type="time" defaultValue="10:00" required /></div></div>
         <button className="btn btn-primary" type="submit">템플릿 저장</button>
       </form>
-      <div style={{ overflowX: "auto", marginTop: 24 }}><table className="table"><thead><tr><th>이름</th><th>요일/시간</th><th>정원</th><th>신청 오픈</th></tr></thead><tbody>{templates.length === 0 ? <tr><td colSpan={4} className="subtle">등록된 템플릿이 없습니다.</td></tr> : templates.map((template) => <tr key={template.id}><td><strong>{template.title}</strong></td><td>{days[template.day_of_week]} {template.start_time.slice(0, 5)}–{template.end_time.slice(0, 5)}</td><td>{template.capacity}명</td><td>{template.application_open_time.slice(0, 5)}</td></tr>)}</tbody></table></div>
+      <div style={{ overflowX: "auto", marginTop: 24 }}><table className="table"><thead><tr><th>이름</th><th>요일/시간</th><th>정원</th><th>신청 오픈</th><th>관리</th></tr></thead><tbody>{templates.length === 0 ? <tr><td colSpan={5} className="subtle">등록된 템플릿이 없습니다.</td></tr> : templates.map((template) => <tr key={template.id}><td><strong>{template.title}</strong></td><td>{days[template.day_of_week]} {template.start_time.slice(0, 5)}–{template.end_time.slice(0, 5)}</td><td>{template.capacity}명</td><td>{template.application_open_time.slice(0, 5)}</td><td><SessionTemplateEditor template={template} days={days} action={updateTemplateAction} /></td></tr>)}</tbody></table></div>
     </section>
     <section className="card">
       <span className="eyebrow">Session instances</span><h2 style={{ marginTop: 12 }}>회차 생성</h2>
