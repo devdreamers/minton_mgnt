@@ -77,6 +77,15 @@ export async function updateSessionTemplate(templateId: string, input: Partial<O
   return data as SessionTemplate;
 }
 
+export async function deleteSessionTemplate(templateId: string) {
+  const { error } = await createSupabaseAdminClient()
+    .from("session_templates")
+    .delete()
+    .eq("id", templateId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/sessions");
+}
+
 export async function createSessionInstance(input: Omit<SessionInstance, "id" | "created_at" | "status">) {
   const { data, error } = await createSupabaseAdminClient().from("session_instances").insert({ ...input, status: "scheduled" }).select().single();
   if (error) throw new Error(error.message);

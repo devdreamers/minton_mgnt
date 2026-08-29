@@ -3,9 +3,15 @@
 import { useState } from "react";
 import type { SessionTemplate } from "@/lib/types";
 
-export function SessionTemplateEditor({ template, days, action }: { template: SessionTemplate; days: string[]; action: (formData: FormData) => void }) {
+export function SessionTemplateEditor({ template, days, action, deleteAction }: { template: SessionTemplate; days: string[]; action: (formData: FormData) => void; deleteAction: (formData: FormData) => void }) {
   const [editing, setEditing] = useState(false);
-  if (!editing) return <button className="btn" type="button" onClick={() => setEditing(true)}>수정</button>;
+  if (!editing) return <div className="template-management">
+    <button className="btn btn-compact" type="button" onClick={() => setEditing(true)}>수정</button>
+    <form action={deleteAction} onSubmit={(event) => { if (!window.confirm("이 소모임 템플릿을 삭제할까요?")) event.preventDefault(); }}>
+      <input name="template_id" type="hidden" value={template.id} />
+      <button className="btn btn-compact btn-danger" type="submit">삭제</button>
+    </form>
+  </div>;
   return <form className="template-edit-form" action={action}>
     <input name="template_id" type="hidden" value={template.id} />
     <input name="title" defaultValue={template.title} aria-label="소모임명" required />

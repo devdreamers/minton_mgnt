@@ -3,10 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireApprovedAdmin } from "@/lib/auth/require-admin";
-import { cancelSession, createSessionInstance, createSessionTemplate, getSessionTemplate, updateSessionTemplate } from "@/lib/services/session-service";
+import { cancelSession, createSessionInstance, createSessionTemplate, deleteSessionTemplate, getSessionTemplate, updateSessionTemplate } from "@/lib/services/session-service";
 
 const koreaDateTimeForDate = (date: string, time: string) => new Date(`${date}T${time.slice(0, 5)}:00+09:00`).toISOString();
 const isDuplicateTemplateError = (error: unknown) => error instanceof Error && error.message.includes("session template already exists");
+const isTemplateInUseError = (error: unknown) => error instanceof Error && (error.message.includes("foreign key") || error.message.includes("still referenced"));
 
 export async function createTemplateAction(formData: FormData) {
   const admin = await requireApprovedAdmin();
@@ -44,6 +45,19 @@ export async function updateTemplateAction(formData: FormData) {
     throw error;
   }
   redirect("/admin/sessions?result=template-updated");
+}
+
+export async function deleteTemplateAction(formData: FormData) {
+  await requireApprovedAdmin();
+  const templateId = String(formData.get("template_id") ?? "");
+  if (!templateId) throw new Error("template_id is required");
+  try {
+    await deleteSessionTemplate(templateId);
+  } catch (error) {
+    if (isTemplateInUseError(error)) redirect("/admin/sessions?error=template-in-use");
+    throw error;
+  }
+  redirect("/admin/sessions?result=template-deleted");
 }
 
 export async function createInstanceAction(formData: FormData) {
