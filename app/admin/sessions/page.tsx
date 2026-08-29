@@ -18,6 +18,7 @@ export default async function AdminSessionsPage({ searchParams }: { searchParams
     : query.result === "template-updated" ? "소모임 템플릿을 수정했습니다."
     : query.result === "instance-created" ? "템플릿 정보로 회차를 생성했습니다."
     : query.result === "session-canceled" ? "소모임 회차를 취소했습니다. 같은 날짜로 새 회차를 만들 수 있습니다."
+    : query.error === "template-duplicate" ? "같은 소모임 템플릿이 이미 있습니다."
     : query.error === "wrong-day" ? "선택한 날짜가 템플릿의 요일과 다릅니다."
     : query.error === "duplicate" ? "같은 템플릿과 날짜의 회차가 이미 있습니다."
     : query.error === "create-failed" ? "회차 생성에 실패했습니다. 입력 내용을 확인해주세요."

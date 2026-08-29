@@ -6,6 +6,7 @@ import { requireApprovedAdmin } from "@/lib/auth/require-admin";
 import { cancelSession, createSessionInstance, createSessionTemplate, getSessionTemplate, updateSessionTemplate } from "@/lib/services/session-service";
 
 const koreaDateTimeForDate = (date: string, time: string) => new Date(`${date}T${time.slice(0, 5)}:00+09:00`).toISOString();
+const isDuplicateTemplateError = (error: unknown) => error instanceof Error && error.message.includes("session template already exists");
 
 export async function createTemplateAction(formData: FormData) {
   const admin = await requireApprovedAdmin();
@@ -16,7 +17,12 @@ export async function createTemplateAction(formData: FormData) {
   const open = String(formData.get("application_open_time") ?? "");
   const capacity = Number(formData.get("capacity"));
   if (!title || !Number.isInteger(day) || day < 0 || day > 6 || !start || !end || !open || capacity < 1 || end <= start) throw new Error("소모임 템플릿 정보가 올바르지 않습니다.");
-  await createSessionTemplate({ title, day_of_week: day, start_time: start, end_time: end, application_open_time: open, capacity, is_active: true, created_by: admin.auth_user_id });
+  try {
+    await createSessionTemplate({ title, day_of_week: day, start_time: start, end_time: end, application_open_time: open, capacity, is_active: true, created_by: admin.auth_user_id });
+  } catch (error) {
+    if (isDuplicateTemplateError(error)) redirect("/admin/sessions?error=template-duplicate");
+    throw error;
+  }
   revalidatePath("/admin/sessions");
   redirect("/admin/sessions?result=template-created");
 }
@@ -31,7 +37,12 @@ export async function updateTemplateAction(formData: FormData) {
   const open = String(formData.get("application_open_time") ?? "");
   const capacity = Number(formData.get("capacity"));
   if (!templateId || !title || !Number.isInteger(day) || day < 0 || day > 6 || !start || !end || !open || capacity < 1 || end <= start) throw new Error("소모임 템플릿 정보가 올바르지 않습니다.");
-  await updateSessionTemplate(templateId, { title, day_of_week: day, start_time: start, end_time: end, application_open_time: open, capacity, is_active: true });
+  try {
+    await updateSessionTemplate(templateId, { title, day_of_week: day, start_time: start, end_time: end, application_open_time: open, capacity, is_active: true });
+  } catch (error) {
+    if (isDuplicateTemplateError(error)) redirect("/admin/sessions?error=template-duplicate");
+    throw error;
+  }
   redirect("/admin/sessions?result=template-updated");
 }
 
