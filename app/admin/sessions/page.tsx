@@ -1,6 +1,6 @@
 import { requireApprovedAdmin } from "@/lib/auth/require-admin";
 import { listApplicationsForSession, listSessionTemplates, listUpcomingSessions } from "@/lib/services/session-service";
-import { cancelSessionAction, createInstanceAction, createTemplateAction, deleteCanceledSessionAction, updateTemplateAction } from "./actions";
+import { cancelSessionAction, createInstanceAction, createTemplateAction, updateTemplateAction } from "./actions";
 import { SessionInstanceForm } from "./session-instance-form";
 import { SessionTemplateEditor } from "./session-template-editor";
 import { SaveAlert } from "@/app/components/save-alert";
@@ -17,7 +17,7 @@ export default async function AdminSessionsPage({ searchParams }: { searchParams
   const notice = query.result === "template-created" ? "소모임 템플릿을 저장했습니다."
     : query.result === "template-updated" ? "소모임 템플릿을 수정했습니다."
     : query.result === "instance-created" ? "템플릿 정보로 회차를 생성했습니다."
-    : query.result === "session-deleted" ? "취소된 회차를 DB에서 삭제했습니다."
+    : query.result === "session-canceled" ? "소모임 회차를 취소했습니다. 같은 날짜로 새 회차를 만들 수 있습니다."
     : query.error === "wrong-day" ? "선택한 날짜가 템플릿의 요일과 다릅니다."
     : query.error === "duplicate" ? "같은 템플릿과 날짜의 회차가 이미 있습니다."
     : query.error === "create-failed" ? "회차 생성에 실패했습니다. 입력 내용을 확인해주세요."
@@ -41,7 +41,7 @@ export default async function AdminSessionsPage({ searchParams }: { searchParams
       <span className="eyebrow">Session instances</span><h2 style={{ marginTop: 12 }}>회차 생성</h2>
       <p className="muted">템플릿을 선택하고 날짜만 입력하세요. 시간·신청 오픈·정원은 자동으로 적용됩니다.</p>
       {templates.length === 0 ? <div className="notice" style={{ marginTop: 20 }}>먼저 소모임 템플릿을 등록해주세요.</div> : <SessionInstanceForm templates={templates} days={days} action={createInstanceAction} />}
-      <div style={{ overflowX: "auto", marginTop: 28 }}><table className="table"><thead><tr><th>회차</th><th>신청자</th><th>상태</th><th>작업</th></tr></thead><tbody>{sessions.length === 0 ? <tr><td colSpan={4} className="subtle">생성된 회차가 없습니다.</td></tr> : sessions.map((session) => { const apps = applications.get(session.id) ?? []; return <tr key={session.id}><td><strong>{session.session_templates?.title ?? "소모임"}</strong><div className="subtle">{session.session_date} · {new Date(session.start_at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</div></td><td>{apps.filter((application) => application.status === "confirmed").length}/{session.capacity}명<div className="subtle">대기 {apps.filter((application) => application.status === "waitlisted").length}명</div></td><td>{session.status}</td><td>{session.status === "scheduled" ? <form action={cancelSessionAction}><input type="hidden" name="session_id" value={session.id} /><button className="btn" type="submit">회차 취소·삭제</button></form> : <form action={deleteCanceledSessionAction}><input type="hidden" name="session_id" value={session.id} /><button className="btn" type="submit">DB에서 삭제</button></form>}</td></tr>; })}</tbody></table></div>
+      <div style={{ overflowX: "auto", marginTop: 28 }}><table className="table"><thead><tr><th>회차</th><th>신청자</th><th>상태</th><th>작업</th></tr></thead><tbody>{sessions.length === 0 ? <tr><td colSpan={4} className="subtle">생성된 회차가 없습니다.</td></tr> : sessions.map((session) => { const apps = applications.get(session.id) ?? []; return <tr key={session.id}><td><strong>{session.session_templates?.title ?? "소모임"}</strong><div className="subtle">{session.session_date} · {new Date(session.start_at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</div></td><td>{apps.filter((application) => application.status === "confirmed").length}/{session.capacity}명<div className="subtle">대기 {apps.filter((application) => application.status === "waitlisted").length}명</div></td><td>{session.status}</td><td>{session.status === "scheduled" ? <form action={cancelSessionAction}><input type="hidden" name="session_id" value={session.id} /><button className="btn" type="submit">회차 취소</button></form> : <span className="subtle">취소 처리됨</span>}</td></tr>; })}</tbody></table></div>
     </section>
   </div>;
 }

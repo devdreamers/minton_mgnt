@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireApprovedAdmin } from "@/lib/auth/require-admin";
-import { cancelSession, createSessionInstance, createSessionTemplate, deleteCanceledSession, getSessionTemplate, updateSessionTemplate } from "@/lib/services/session-service";
+import { cancelSession, createSessionInstance, createSessionTemplate, getSessionTemplate, updateSessionTemplate } from "@/lib/services/session-service";
 
 const koreaDateTimeForDate = (date: string, time: string) => new Date(`${date}T${time.slice(0, 5)}:00+09:00`).toISOString();
 
@@ -65,12 +65,6 @@ export async function cancelSessionAction(formData: FormData) {
   const sessionId = String(formData.get("session_id") ?? "");
   if (!sessionId) throw new Error("session_id is required");
   await cancelSession(sessionId);
-}
-
-export async function deleteCanceledSessionAction(formData: FormData) {
-  await requireApprovedAdmin();
-  const sessionId = String(formData.get("session_id") ?? "");
-  if (!sessionId) throw new Error("session_id is required");
-  await deleteCanceledSession(sessionId);
-  redirect("/admin/sessions?result=session-deleted");
+  revalidatePath("/admin/sessions"); revalidatePath("/sessions");
+  redirect("/admin/sessions?result=session-canceled");
 }
