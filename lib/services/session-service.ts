@@ -20,8 +20,10 @@ export async function getSessionTemplate(templateId: string) {
   return data as SessionTemplate;
 }
 
-export async function listUpcomingSessions(from = new Date().toISOString().slice(0, 10)) {
-  const { data, error } = await createSupabaseAdminClient().from("session_instances").select("*, session_templates(title)").gte("session_date", from).order("session_date").order("start_at");
+export async function listUpcomingSessions(from = new Date().toISOString().slice(0, 10), includeCanceled = false) {
+  let query = createSupabaseAdminClient().from("session_instances").select("*, session_templates(title)").gte("session_date", from).order("session_date").order("start_at");
+  if (!includeCanceled) query = query.eq("status", "scheduled");
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
   return data as (SessionInstance & { session_templates: { title: string } | null })[];
 }
@@ -35,7 +37,8 @@ export async function listApplicationsForSession(sessionId: string) {
 export async function listMyApplications(memberId: string) {
   const { data, error } = await createSupabaseAdminClient().from("session_applications").select("*, session_instances(*, session_templates(title))").eq("member_id", memberId).in("status", ["confirmed", "waitlisted"]).order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return data as (SessionApplication & { session_instances: SessionInstance & { session_templates: { title: string } | null } })[];
+  return (data as (SessionApplication & { session_instances: (SessionInstance & { session_templates: { title: string } | null }) | null })[])
+    .filter((application) => application.session_instances?.status === "scheduled");
 }
 
 export async function createSessionTemplate(input: Omit<SessionTemplate, "id" | "created_at">) {

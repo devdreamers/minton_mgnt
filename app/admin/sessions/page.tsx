@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminSessionsPage({ searchParams }: { searchParams: Promise<{ result?: string; error?: string }> }) {
   await requireApprovedAdmin();
-  const [templates, sessions] = await Promise.all([listSessionTemplates().catch(() => []), listUpcomingSessions().catch(() => [])]);
+  const [templates, sessions] = await Promise.all([listSessionTemplates().catch(() => []), listUpcomingSessions(undefined, true).catch(() => [])]);
   const applicationEntries = await Promise.all(sessions.slice(0, 10).map(async (session) => [session.id, await listApplicationsForSession(session.id).catch(() => [])] as const));
   const applications = new Map(applicationEntries);
   const query = await searchParams;
