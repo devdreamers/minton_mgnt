@@ -87,6 +87,31 @@ button { cursor: pointer; }
 .lesson-slot > div { display: grid; gap: 3px; }
 .lesson-slot-unavailable { border-color: var(--line); background: #fafafa; }
 .lesson-slot .btn { flex-shrink: 0; }
+.lesson-booking-flow { display: grid; gap: 22px; margin-top: 26px; }
+.lesson-calendar-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.lesson-date { display: grid; gap: 4px; min-width: 82px; min-height: 82px; padding: 11px 8px; border: 1px solid var(--line); border-radius: 12px; color: var(--text); background: #fff; text-align: center; }
+.lesson-date span { color: var(--muted); font-size: 12px; }
+.lesson-date strong { font-size: 14px; }
+.lesson-date small { color: var(--muted); font-size: 10px; }
+.lesson-date.selected { border-color: var(--accent); color: #fff; background: var(--accent); }
+.lesson-date.selected span, .lesson-date.selected small { color: #dff4e7; }
+.lesson-step-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.lesson-step { display: grid; gap: 12px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.lesson-step > div:first-of-type { display: grid; gap: 3px; }
+.lesson-step h2 { margin: 0; font-size: 1.05rem; }
+.lesson-step-number { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; color: var(--accent); background: var(--accent-soft); font-weight: 800; }
+.lesson-ticket-list, .lesson-choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.lesson-ticket, .lesson-choice { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: #fff; text-align: left; }
+.lesson-ticket span { color: var(--muted); font-size: 12px; }
+.lesson-ticket.selected, .lesson-choice.selected { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.lesson-time-step { gap: 14px; }
+.lesson-time-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.lesson-time-button { display: grid; gap: 3px; padding: 11px 10px; border: 1px solid #d8eadf; border-radius: 10px; background: #fbfefc; }
+.lesson-time-button > span { font-weight: 700; }
+.lesson-time-button small { color: var(--accent); font-size: 11px; }
+.lesson-time-button.unavailable { border-color: var(--line); background: #f5f6f7; }
+.lesson-time-button.unavailable small { color: var(--muted); }
+.lesson-time-button form { margin-top: 4px; }
 .empty-state { max-width: 760px; margin: 30px auto 0; }
 .dashboard-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .dashboard-card { position: relative; display: flex; align-items: flex-start; gap: 16px; min-height: 170px; padding: 23px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); transition: transform .15s, border-color .15s; }
@@ -122,5 +147,5 @@ button { cursor: pointer; }
 .subtle { color: var(--muted); font-size: 13px; line-height: 1.6; }
 .notice { padding: 13px 15px; border-radius: 10px; border: 1px solid #ccebd8; background: var(--accent-soft); }
 .notice.danger { border-color: #f0caca; background: #fff3f3; color: var(--danger); }
-@media (max-width: 920px) { .hero, .grid.cols-2, .grid.cols-3, .dashboard-grid { grid-template-columns: 1fr; } .admin-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .product-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .product-row .btn { width: 100%; } .roadmap-card { display: grid; gap: 16px; } .topbar { align-items: flex-start; } }
-@media (max-width: 560px) { .topbar { flex-direction: column; } .nav { gap: 14px; flex-wrap: wrap; } .hero h1 { max-width: none; } .table th, .table td { padding: 11px 8px; } .lesson-slots { grid-template-columns: 1fr; } }
+@media (max-width: 920px) { .hero, .grid.cols-2, .grid.cols-3, .dashboard-grid, .lesson-step-grid { grid-template-columns: 1fr; } .admin-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .product-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .product-row .btn { width: 100%; } .roadmap-card { display: grid; gap: 16px; } .topbar { align-items: flex-start; } }
+@media (max-width: 560px) { .topbar { flex-direction: column; } .nav { gap: 14px; flex-wrap: wrap; } .hero h1 { max-width: none; } .table th, .table td { padding: 11px 8px; } .lesson-slots, .lesson-time-grid { grid-template-columns: 1fr 1fr; } .lesson-calendar-strip { grid-template-columns: repeat(7, 82px); } }

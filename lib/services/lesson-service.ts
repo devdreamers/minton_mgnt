@@ -55,6 +55,17 @@ export async function listMyLessonBookings(memberId: string) {
   return data as (LessonBooking & { lesson_slots: LessonSlot | null })[];
 }
 
+export async function listConfirmedLessonBookings(slotIds: string[]) {
+  if (slotIds.length === 0) return [] as LessonBooking[];
+  const { data, error } = await createSupabaseAdminClient()
+    .from("lesson_bookings")
+    .select("*")
+    .in("slot_id", slotIds)
+    .eq("status", "confirmed");
+  if (error) throw new Error(error.message);
+  return data as LessonBooking[];
+}
+
 export async function bookLesson(slotId: string, memberId: string) {
   const { data, error } = await createSupabaseAdminClient().rpc("book_lesson", { p_slot_id: slotId, p_member_id: memberId });
   if (error) throw new Error(error.message);
