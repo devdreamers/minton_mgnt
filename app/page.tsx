@@ -52,10 +52,11 @@ export default async function HomePage() {
             <div><span className="card-kicker">PROFILE</span><h2>내 정보</h2><p>이름과 전화번호를 관리합니다.</p></div>
             <span className="card-arrow">→</span>
           </Link>
-          <div className="dashboard-card dashboard-card-muted">
+          <Link className="dashboard-card" href="/lessons">
             <span className="dashboard-icon">04</span>
-            <div><span className="card-kicker">COMING SOON</span><h2>레슨 예약</h2><p>코트와 레슨 시간 예약 기능을 준비하고 있습니다.</p></div>
-          </div>
+            <div><span className="card-kicker">LESSON</span><h2>레슨 예약</h2><p>코트와 레슨 시간을 선택해 예약합니다.</p></div>
+            <span className="card-arrow">→</span>
+          </Link>
         </section>
       </>
     );
